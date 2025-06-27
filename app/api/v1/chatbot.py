@@ -57,10 +57,12 @@ async def chat(
         logger.info(
             "chat_request_received",
             session_id=session.id,
-            message_count=len(chat_request.messages),
+            user_id=session.user_id,
+            remote_addr=request.client.host if request.client else None,
+            headers=dict(request.headers),
+            body=chat_request.model_dump() if hasattr(chat_request, 'model_dump') else str(chat_request),
         )
-
-       
+        logger.info(f"chat_request_body: {chat_request.messages}")
 
         result = await agent.get_response(
             chat_request.messages, session.id, user_id=session.user_id

@@ -6,30 +6,49 @@ services:
     build:
       context: .
       args:
-        APP_ENV: ${APP_ENV:-development}
+        APP_ENV: ${APP_ENV}
     ports:
       - "8000:8000"
     volumes:
       - ./app:/app/app
       - ./logs:/app/logs
     env_file:
-      - .env.${APP_ENV:-development}
+      - .env.${APP_ENV}
     environment:
-      - APP_ENV=${APP_ENV:-development}
       # Pass sensitive variables at runtime
-      - LLM_API_KEY=${LLM_API_KEY:-dummy-key-for-development}
-      - LANGFUSE_PUBLIC_KEY=${LANGFUSE_PUBLIC_KEY:-}
-      - LANGFUSE_SECRET_KEY=${LANGFUSE_SECRET_KEY:-}
-      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-supersecretkeythatshouldbechangedforproduction}
+      - APP_ENV=${APP_ENV}
+      # - LLM_API_KEY=${LLM_API_KEY}
+      # - LANGFUSE_PUBLIC_KEY=${LANGFUSE_PUBLIC_KEY}
+      # - LANGFUSE_SECRET_KEY=${LANGFUSE_SECRET_KEY}
+      # - JWT_SECRET_KEY=${JWT_SECRET_KEY}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
-      interval: 30s
+      interval: 10m
       timeout: 10s
       retries: 3
       start_period: 10s
     restart: on-failure
     networks:
       - monitoring
+      - common
+
+  postgres:
+    image: postgres:15
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
+      interval: 10m
+      timeout: 5s
+      retries: 5
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env.${APP_ENV}
+    volumes:
+      - ./postgres-volume:/var/lib/postgresql/data
+    networks:
+      - monitoring
+      - common
 
   # Prometheus
   prometheus:
@@ -42,7 +61,14 @@ services:
       - '--config.file=/etc/prometheus/prometheus.yml'
     networks:
       - monitoring
+      - common
     restart: always
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9090/-/healthy"]
+      interval: 10m
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
   # Grafana
   grafana:
@@ -58,7 +84,14 @@ services:
       - GF_USERS_ALLOW_SIGN_UP=false
     networks:
       - monitoring
+      - common
     restart: always
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/api/health"]
+      interval: 10m
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:latest
@@ -71,12 +104,21 @@ services:
       - /var/lib/docker/:/var/lib/docker:ro
     networks:
       - monitoring
+      - common
     restart: always
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/healthz"]
+      interval: 10m
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
 
 networks:
   monitoring:
     driver: bridge
+  common:
+    external: true
 
 volumes:
   grafana-storage: 

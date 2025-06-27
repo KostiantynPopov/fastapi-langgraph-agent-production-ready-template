@@ -75,7 +75,7 @@ cp .env.example .env.[development|staging|production] # e.g. .env.development
 2. Update the database connection string in your `.env` file:
 
 ```bash
-POSTGRES_URL="postgresql://:your-db-password@POSTGRES_HOST:POSTGRES_PORT/POSTGRES_DB"
+POSTGRES_URL="postgresql://postgres:yourpassword@postgres:5432/yourdb"
 ```
 
 - You don't have to create the tables manually, the ORM will handle that for you.But if you faced any issues,please run the `schemas.sql` file to create the tables manually.
@@ -193,3 +193,27 @@ The application uses a flexible configuration system with environment-specific s
 
 - `.env.development`
 -
+
+## 🐘 PostgreSQL via Docker
+
+The project uses a separate postgres container, which is automatically started together with the application via docker-compose. Data is stored in the ./postgres-volume volume and is not included in the repository.
+
+### Example .env for postgres:
+```
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=yourpassword
+POSTGRES_DB=yourdb
+POSTGRES_PORT=5432
+POSTGRES_URL=postgresql://postgres:yourpassword@postgres:5432/yourdb
+```
+
+- Do not commit .env with real passwords and keys to the public repository!
+- The ./postgres-volume volume stores data locally between container restarts.
+
+### Running with PostgreSQL:
+
+```bash
+docker-compose up --build
+```
+
+The application and database will be available automatically. Use the parameters from .env to access the database.
