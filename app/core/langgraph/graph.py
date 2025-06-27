@@ -182,6 +182,9 @@ class LangGraphAgent:
         """
         outputs = []
         for tool_call in state.messages[-1].tool_calls:
+            logger.info(
+                f"[tool_call] Вызов инструмента: {tool_call['name']} с аргументами: {tool_call['args']} (user_id={getattr(state, 'user_id', None)}, session_id={getattr(state, 'session_id', None)})"
+            )
             tool_result = await self.tools_by_name[tool_call["name"]].ainvoke(tool_call["args"])
             outputs.append(
                 ToolMessage(
@@ -205,6 +208,7 @@ class LangGraphAgent:
         last_message = messages[-1]
         # If there is no function call, then we finish
         if not last_message.tool_calls:
+            logger.info(f"[tool_call] Инструмент не вызывается (нет tool_calls) (user_id={getattr(state, 'user_id', None)}, session_id={getattr(state, 'session_id', None)})")
             return "end"
         # Otherwise if there is, we continue
         else:
