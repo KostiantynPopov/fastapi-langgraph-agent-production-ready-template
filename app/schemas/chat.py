@@ -56,6 +56,7 @@ class ChatRequest(BaseModel):
 
     Attributes:
         messages: List of messages in the conversation.
+        entity_id: Optional external entity identifier (e.g., Bitrix24 CHAT_ENTITY_ID)
     """
 
     messages: List[Message] = Field(
@@ -63,6 +64,7 @@ class ChatRequest(BaseModel):
         description="List of messages in the conversation",
         min_length=1,
     )
+    entity_id: str | None = Field(default=None, description="External entity ID (e.g., Bitrix24 CHAT_ENTITY_ID)")
 
 
 class ChatResponse(BaseModel):

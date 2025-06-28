@@ -58,6 +58,7 @@ async def chat(
             "chat_request_received",
             session_id=session.id,
             user_id=session.user_id,
+            entity_id=chat_request.entity_id,
             remote_addr=request.client.host if request.client else None,
             headers=dict(request.headers),
             body=chat_request.model_dump() if hasattr(chat_request, 'model_dump') else str(chat_request),
