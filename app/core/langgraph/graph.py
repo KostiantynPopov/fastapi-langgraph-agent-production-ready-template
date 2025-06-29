@@ -183,7 +183,10 @@ class LangGraphAgent:
         outputs = []
         for tool_call in state.messages[-1].tool_calls:
             logger.info(
-                f"[tool_call] Вызов инструмента: {tool_call['name']} с аргументами: {tool_call['args']} (user_id={getattr(state, 'user_id', None)}, session_id={getattr(state, 'session_id', None)})"
+                f"[tool_call] Вызов инструмента: {tool_call['name']} "
+                f"с аргументами: {tool_call['args']} "
+                f"(user_id={getattr(state, 'user_id', None)}, "
+                f"session_id={getattr(state, 'session_id', None)})"
             )
             tool_result = await self.tools_by_name[tool_call["name"]].ainvoke(tool_call["args"])
             outputs.append(
