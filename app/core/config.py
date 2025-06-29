@@ -198,6 +198,10 @@ class Settings:
         self.EVALUATION_API_KEY = os.getenv("EVALUATION_API_KEY", self.LLM_API_KEY)
         self.EVALUATION_SLEEP_TIME = int(os.getenv("EVALUATION_SLEEP_TIME", "10"))
 
+        # RAG Configuration
+        self.RAG_URL = os.getenv("RAG_URL", "http://localhost:8001")
+        self.RAG_COLLECTION_ID = os.getenv("RAG_COLLECTION_ID", "default")
+
         # Apply environment-specific settings
         self.apply_environment_settings()
 

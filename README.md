@@ -217,3 +217,15 @@ docker-compose up --build
 ```
 
 The application and database will be available automatically. Use the parameters from .env to access the database.
+
+## Запуск flaprt отдельно
+
+1. Убедись, что контейнеры postgres и redis уже запущены в сети common (например, через корневой docker-compose).
+2. Если сеть common не создана:
+   ```bash
+   docker network create common
+   ```
+3. Запусти сервис flaprt:
+   ```bash
+   docker compose up -d
+   ```
