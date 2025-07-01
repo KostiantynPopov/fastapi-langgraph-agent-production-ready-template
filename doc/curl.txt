@@ -1,0 +1,2 @@
+curl -X DELETE "http://localhost:8000/api/v1/chatbot/messages" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI1YmMzYTk2ZS0xYWU3LTQxYmUtOTY1ZS0yNjdjZTViNjA2NmYiLCJleHAiOjE3NTM5MjAxNjUsImlhdCI6MTc1MTMyODE2NSwianRpIjoiNWJjM2E5NmUtMWFlNy00MWJlLTk2NWUtMjY3Y2U1YjYwNjZmLTE3NTEzMjgxNjUuNjkyODExIn0.Zwdb1n5XSjmvF4snZ2vylkSJ47sc7r01KtTqyQa2Ddg"
