@@ -58,15 +58,15 @@ async def chat(
             "chat_request_received",
             session_id=session.id,
             user_id=session.user_id,
-            entity_id=chat_request.entity_id,
             remote_addr=request.client.host if request.client else None,
             headers=dict(request.headers),
             body=chat_request.model_dump() if hasattr(chat_request, 'model_dump') else str(chat_request),
         )
         logger.info(f"chat_request_body: {chat_request.messages}")
+        logger.info(f"[api] chat_request.entity_id: {chat_request.entity_id}")
 
         result = await agent.get_response(
-            chat_request.messages, session.id, user_id=session.user_id
+            chat_request.messages, session.id, user_id=session.user_id, entity_id=chat_request.entity_id
         )
 
         logger.info("chat_request_processed", session_id=session.id)
@@ -103,6 +103,7 @@ async def chat_stream(
             session_id=session.id,
             message_count=len(chat_request.messages),
         )
+        logger.info(f"[api] chat_request.entity_id (stream): {chat_request.entity_id}")
 
         async def event_generator():
             """Generate streaming events.
@@ -117,7 +118,7 @@ async def chat_stream(
                 full_response = ""
                 with llm_stream_duration_seconds.labels(model=agent.llm.model_name).time():
                     async for chunk in agent.get_stream_response(
-                        chat_request.messages, session.id, user_id=session.user_id
+                        chat_request.messages, session.id, user_id=session.user_id, entity_id=chat_request.entity_id
                      ):
                         full_response += chunk
                         response = StreamResponse(content=chunk, done=False)

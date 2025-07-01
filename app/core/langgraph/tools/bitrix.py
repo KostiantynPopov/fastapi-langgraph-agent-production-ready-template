@@ -43,6 +43,26 @@ class BitrixFindContactByEntityIdTool(BaseTool):
             contacts = data.get('result', [])
             if contacts:
                 return contacts[0]
+                # return str(contacts[0])
+            return f"No contact found for entity_id: {entity_id}"
+        except Exception as e:
+            return f"Error searching contact by entity_id: {e}"
+
+    async def _arun(self, entity_id: str):
+        if not BITRIX_WEBHOOK:
+            return "BITRIX_WEBHOOK env variable is not set."
+        # Гарантированно добавляем префикс, не заменяя ничего в entity_id
+        LOGGER.info(f"[_arun] entity_id: {entity_id}")
+        im_value = f"imol|{entity_id}"
+        LOGGER.info(f"[_arun] im_value: {im_value}")
+        payload = {'filter': {'IM': im_value}}
+        try:
+            url = f"{BITRIX_WEBHOOK}/crm.contact.list.json"
+            resp = _retry_post(url, payload)
+            data = resp.json()
+            contacts = data.get('result', [])
+            if contacts:
+                return contacts[0]
             return f"No contact found for entity_id: {entity_id}"
         except Exception as e:
             return f"Error searching contact by entity_id: {e}"

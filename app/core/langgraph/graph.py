@@ -182,16 +182,15 @@ class LangGraphAgent:
         """
         outputs = []
         for tool_call in state.messages[-1].tool_calls:
+            tool_args = tool_call["args"] or {}
+            # Жестко перезаписываем entity_id только из state
+            tool_args["entity_id"] = getattr(state, "entity_id", None)
             logger.info(
-                f"[tool_call] Вызов инструмента: {tool_call['name']} "
-                f"с аргументами: {tool_call['args']} "
-                f"(user_id={getattr(state, 'user_id', None)}, "
-                f"session_id={getattr(state, 'session_id', None)})"
+                f"[tool_call] Вызов инструмента: {tool_call['name']} с аргументами: {tool_args} (user_id={getattr(state, 'user_id', None)}, session_id={getattr(state, 'session_id', None)})"
             )
-            tool_result = await self.tools_by_name[tool_call["name"]].ainvoke(tool_call["args"])
+            tool_result = await self.tools_by_name[tool_call["name"]].ainvoke(tool_args)
             logger.info(
-                f"[tool_call][result] Ответ инструмента {tool_call['name']}: {tool_result} "
-                f"(user_id={getattr(state, 'user_id', None)}, session_id={getattr(state, 'session_id', None)})"
+                f"[tool_call][result] Ответ инструмента {tool_call['name']}: {tool_result} (user_id={getattr(state, 'user_id', None)}, session_id={getattr(state, 'session_id', None)})"
             )
             outputs.append(
                 ToolMessage(
@@ -277,6 +276,7 @@ class LangGraphAgent:
         messages: list[Message],
         session_id: str,
         user_id: Optional[str] = None,
+        entity_id: Optional[str] = None,
     ) -> list[dict]:
         """Get a response from the LLM.
 
@@ -284,10 +284,12 @@ class LangGraphAgent:
             messages (list[Message]): The messages to send to the LLM.
             session_id (str): The session ID for Langfuse tracking.
             user_id (Optional[str]): The user ID for Langfuse tracking.
+            entity_id (Optional[str]): The entity ID for Langfuse tracking.
 
         Returns:
             list[dict]: The response from the LLM.
         """
+        logger.info(f"[agent] get_response entity_id: {entity_id}")
         if self._graph is None:
             self._graph = await self.create_graph()
         config = {
@@ -302,7 +304,7 @@ class LangGraphAgent:
         }
         try:
             response = await self._graph.ainvoke(
-                {"messages": dump_messages(messages), "session_id": session_id}, config
+                {"messages": dump_messages(messages), "session_id": session_id, "entity_id": entity_id}, config
             )
             return self.__process_messages(response["messages"])
         except Exception as e:
@@ -310,7 +312,7 @@ class LangGraphAgent:
             raise e
 
     async def get_stream_response(
-        self, messages: list[Message], session_id: str, user_id: Optional[str] = None
+        self, messages: list[Message], session_id: str, user_id: Optional[str] = None, entity_id: Optional[str] = None
     ) -> AsyncGenerator[str, None]:
         """Get a stream response from the LLM.
 
@@ -318,10 +320,12 @@ class LangGraphAgent:
             messages (list[Message]): The messages to send to the LLM.
             session_id (str): The session ID for the conversation.
             user_id (Optional[str]): The user ID for the conversation.
+            entity_id (Optional[str]): The entity ID for the conversation.
 
         Yields:
             str: Tokens of the LLM response.
         """
+        logger.info(f"[agent] get_stream_response entity_id: {entity_id}")
         config = {
             "configurable": {"thread_id": session_id},
             "callbacks": [
@@ -337,7 +341,7 @@ class LangGraphAgent:
 
         try:
             async for token, _ in self._graph.astream(
-                {"messages": dump_messages(messages), "session_id": session_id}, config, stream_mode="messages"
+                {"messages": dump_messages(messages), "session_id": session_id, "entity_id": entity_id}, config, stream_mode="messages"
             ):
                 try:
                     yield token.content

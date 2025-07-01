@@ -19,6 +19,7 @@ class GraphState(BaseModel):
         default_factory=list, description="The messages in the conversation"
     )
     session_id: str = Field(..., description="The unique identifier for the conversation session")
+    entity_id: str | None = Field(default=None, description="External entity ID (e.g., Bitrix24 CHAT_ENTITY_ID)")
 
     @field_validator("session_id")
     @classmethod
