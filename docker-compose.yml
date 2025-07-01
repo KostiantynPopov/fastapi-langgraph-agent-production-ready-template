@@ -32,8 +32,9 @@ services:
       - monitoring
       - common
 
-  postgres:
+  flaprt-postgres.:
     image: postgres:15
+    container_name: flaprt-postgres
     restart: always
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
