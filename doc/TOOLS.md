@@ -113,33 +113,36 @@
 
 ## 7. Пример добавления нового инструмента
 
-1. **Создай файл** `flaprt/app/core/langgraph/tools/weather.py`:
+1. **Создай файл** `flaprt/app/core/langgraph/tools/my_tool.py`:
    ```python
    from langchain_core.tools.base import BaseTool
    from pydantic import BaseModel, Field
 
-   class WeatherArgs(BaseModel):
-       city: str = Field(..., description="Название города (например, Лиссабон, Paris, Tokyo)")
+   class MyArgsModel(BaseModel):
+       param: str = Field(..., description="Описание параметра")
 
-   class WeatherTool(BaseTool):
-       name: str = "weather"
-       description: str = "Get current weather for a city"
-       args_schema: type = WeatherArgs
+   class MyTool(BaseTool):
+       name: str = "my_tool"
+       description: str = "Описание инструмента"
+       args_schema: type = MyArgsModel
 
-       def _run(self, city: str):
-           # Реализация запроса к погодному API
-           return f"Погода в {city}: +25°C"
+       def _run(self, param: str):
+           # Реализация
+           return f"Результат для {param}"
 
-   weather_tool = WeatherTool()
+       def _arun(self, *args, **kwargs):
+           raise NotImplementedError("Use async version (_arun)")
+
+   my_tool = MyTool()
    ```
 
 2. **Зарегистрируй в `__init__.py`:**
    ```python
-   from .weather import weather_tool
-   tools: list[BaseTool] = [duckduckgo_search_tool, weather_tool]
+   from .my_tool import my_tool
+   tools: list[BaseTool] = [duckduckgo_search_tool, my_tool]
    ```
 
-3. **Готово!**  Теперь LLM сможет вызывать инструмент `weather` по смыслу вопроса.
+3. **Готово!**  Теперь LLM сможет вызывать инструмент `my_tool` по смыслу вопроса.
 
 ## 8. Отладка
 

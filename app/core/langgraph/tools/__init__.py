@@ -11,12 +11,23 @@ from .duckduckgo_search import duckduckgo_search_tool
 from .general import city_time_tool
 from .bitrix import bitrix_find_contact_by_entity_id_tool
 from .corporate_search import corporate_search_tool
-from .weather import business_card_price_tool
+from .click_knock import (
+    upload_file_tool,
+    create_order_tool,
+    create_task_tool,
+    attach_file_tool,
+    update_task_tool,
+)
 
-tools: list[BaseTool] = [
+
+tools: list = [
     duckduckgo_search_tool,
     corporate_search_tool,
     city_time_tool,
     bitrix_find_contact_by_entity_id_tool,
-    business_card_price_tool
+    upload_file_tool,
+    create_order_tool,
+    create_task_tool,
+    attach_file_tool,
+    update_task_tool,
 ]
