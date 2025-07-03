@@ -42,6 +42,7 @@ from app.utils import (
     dump_messages,
     prepare_messages,
 )
+from app.utils.message_coercion import from_message
 
 
 class LangGraphAgent:
@@ -374,7 +375,7 @@ class LangGraphAgent:
         openai_style_messages = convert_to_openai_messages(messages)
         # keep just assistant and user messages
         return [
-            Message(**message)
+            Message(**{**message, "content": from_message(message["content"])})
             for message in openai_style_messages
             if message["role"] in ["assistant", "user"] and message["content"]
         ]

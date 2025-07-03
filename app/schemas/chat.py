@@ -19,7 +19,7 @@ class Message(BaseModel):
 
     Attributes:
         role: The role of the message sender (user or assistant).
-        content: The content of the message (str or dict with text/file info).
+        content: The content of the message.
     """
 
     model_config = {"extra": "ignore"}
@@ -37,7 +37,19 @@ class Message(BaseModel):
             # Check for null bytes
             if "\0" in v:
                 raise ValueError("Content contains null bytes")
-        return v
+            return v
+        elif isinstance(v, dict):
+            text = v.get("text", "")
+            if not isinstance(text, str):
+                raise ValueError("Field 'text' in content dict must be a string")
+            if re.search(r"<script.*?>.*?</script>", text, re.IGNORECASE | re.DOTALL):
+                raise ValueError("Content.text contains potentially harmful script tags")
+            if "\0" in text:
+                raise ValueError("Content.text contains null bytes")
+            # file может быть любым объектом/None
+            return v
+        else:
+            raise ValueError("Content must be either a string or a dict with 'text' and/or 'file'")
 
 
 class ChatRequest(BaseModel):
